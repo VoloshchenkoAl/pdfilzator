@@ -4,20 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Pdf</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+    <title>Pdflizator</title>
+
+    <style>
+      .for-pdf-js {
+        height: 600px;
+      }
+
+      .for-pdf-js object {
+        height: inherit;
+        width: 100%;
+      }
+    </style>
 </head>
 <body>
-    <form class="pdf-creator-js">
-        <p><label>name: <input required type="text" name="name"></label></p>
-        <p><label>job: <input required type="text" name="job"></label></p>
-        <p><button>send</button></p>
-    </form>
-
-    <object type="application/pdf" class="for-pdf-js"></object>
+    <div class="container">
+        <form class="pdf-creator-js card" style="padding: 20px;">
+            <div class="input-field">
+                <input placeholder="Name" name="name" type="text" class="validate">
+            </div>
+            <div class="input-field">
+                <input placeholder="Job Title" name="job" type="text" class="validate">
+            </div>
+            <p> 
+              <button class="action-btn-js btn waves-effect waves-light" type="submit">Submit</button>
+            </p>
+        </form>
+        <div class="for-pdf-js"></div>
+    </div>
+    
 
     <script>
         const form = document.querySelector('.pdf-creator-js');
         const forPdf = document.querySelector('.for-pdf-js');
+        const submitBtnJs = form.querySelector('.action-btn-js');
 
         form.addEventListener('submit', e => {
             e.preventDefault();
@@ -33,13 +54,24 @@
                 headers: { 'Content-Type': 'application/json' }
             });
 
+            submitBtnJs.disabled = true;
+            submitBtnJs.textContent = 'Loading...';
+
             fetch(myRequest)
                 .then(resp => resp.arrayBuffer())
                 .then(resp => {
                     const fileUrl = URL.createObjectURL(new Blob([resp], {
                         type: "application/pdf"
                     }));
-                    forPdf.setAttribute("data", fileUrl);
+                    const objectEl = document.createElement("object");
+                    objectEl.setAttribute("type", "application/pdf")
+                    objectEl.setAttribute("data", fileUrl);
+                    if (!!forPdf.children.length) {
+                      forPdf.innerHTML = '';
+                    }
+                    forPdf.appendChild(objectEl);
+                    submitBtnJs.disabled = false;
+                    submitBtnJs.textContent = 'Send';
                 });
         });
     </script>
